@@ -3,7 +3,6 @@ import Categorias from '../models/Categorias.js';
 export const obtenerCategorias = async (req, res) => {
     try{
         const categorias = await Categorias.find();
-        console.log(categorias);
 
         res.status(201).json({
             ok: true,
