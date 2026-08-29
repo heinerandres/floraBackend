@@ -21,7 +21,9 @@ export const obtenerCategorias = async (req, res) => {
 
 export const crearCategoria = async (req, res) => {
     try{
+        console.log(req.body);
         const categoria = new Categorias(req.body);
+        console.log(categoria);
         await categoria.save();
 
         res.status(201).json({
@@ -100,7 +102,7 @@ export const obtenerCategoriaPorNombre = async (req, res) => {
 export const eliminarCategoria = async (req, res) => {
     try {
         const id  = req.body;
-        const categoria = await Categoria.findByIdAndDelete(id);
+        const categoria = await Categorias.findByIdAndDelete(id);
         if (!categoria) {
             return res.status(404).json({
                 ok: false,

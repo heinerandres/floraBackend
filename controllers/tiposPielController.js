@@ -53,7 +53,7 @@ export const editarTipoPiel = async (req, res) => {
             req.body,
             { new: true }
         );
-        if (!tiposPielActualizado) {
+        if (!tipoPielActualizado) {
             return res.status(404).json({
                 ok: false,
                 msg: 'Tipo de Piel no encontrado'
@@ -100,7 +100,7 @@ export const obtenerTipoPielPorNombre = async (req, res) => {
 export const eliminarTipoPiel = async (req, res) => {
     try {
         const id  = req.body;
-        const tipoPiel = await tiposPiel.findByIdAndDelete(id);
+        const tipoPiel = await TiposPiel.findByIdAndDelete(id);
         if (!tipoPiel) {
             return res.status(404).json({
                 ok: false,
