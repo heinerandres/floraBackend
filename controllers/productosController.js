@@ -22,6 +22,7 @@ export const obtenerProductos = async (req, res) => {
 export const crearProducto = async (req, res) => {
     try{
         const producto = new Producto(req.body);
+        console.log(producto);
         await producto.save();
 
         res.status(201).json({

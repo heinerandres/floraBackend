@@ -19,8 +19,9 @@ router.post(
         check('nombre', 'El nombre es obligatorio').not().isEmpty(),
         check('slug', 'El slug es obligatorio').not().isEmpty(),
         check('descripcion', 'La descripción es obligatoria').not().isEmpty(),
-        check('precio', 'La categoria es obligatoria').not().isEmpty(),
-        check('cantidad', 'La categoria es obligatoria').not().isEmpty(),
+        check('precio', 'La categoria es obligatorio').not().isEmpty(),
+        check('cantidad', 'La categoria es obligatorio').not().isEmpty(),
+        check('esDestacado', 'EsDestacado es obligatorio').not().isEmpty(),
         validarCampos
     ] , 
     crearProducto );

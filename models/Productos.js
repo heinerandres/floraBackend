@@ -26,6 +26,9 @@ const ProductosSchema = Schema ({
     cantidad: {
         type: Number
     },
+    esDestacado: {
+        type: Boolean
+    },
 });
 
 export default model( 'Productos', ProductosSchema );
