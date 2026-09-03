@@ -26,6 +26,22 @@ const VariantesSchema = Schema ({
         type: String,
         required: true,
     },
+    ingredientes: [{
+        type: Schema.ObjectId,
+        ref: "Ingredientes"
+    }],
+    beneficios: [{
+        type: Schema.ObjectId,
+        ref: "Beneficios"
+    }],
+    aromas: [{
+        type: Schema.ObjectId,
+        ref: "Aromas"
+    }],
+    tiposPiel: [{
+        type: Schema.ObjectId,
+        ref: "TiposPiel"
+    }]
 });
 
 export default model( 'Variantes', VariantesSchema );

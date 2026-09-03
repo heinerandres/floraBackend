@@ -6,6 +6,7 @@
 import Router from 'express';
 import {check} from 'express-validator';
 import {validarCampos} from '../middlewares/validarCampos.js';
+import upload from '../storage/imagenes.js';
 
 
 const router = Router();
@@ -14,16 +15,9 @@ import { crearProducto, editarProducto, obtenerProductos, obtenerProductoPorSlug
 
 router.post( 
     '/insertar', 
-    [
-        check('categoria', 'La categoria es obligatoria').not().isEmpty(),
-        check('nombre', 'El nombre es obligatorio').not().isEmpty(),
-        check('slug', 'El slug es obligatorio').not().isEmpty(),
-        check('descripcion', 'La descripción es obligatoria').not().isEmpty(),
-        check('precio', 'La categoria es obligatorio').not().isEmpty(),
-        check('cantidad', 'La categoria es obligatorio').not().isEmpty(),
-        check('esDestacado', 'EsDestacado es obligatorio').not().isEmpty(),
-        validarCampos
-    ] , 
+    upload.fields([
+        { name: 'img1', maxCount: 1 },
+    ]),
     crearProducto );
 
 router.get(
@@ -32,7 +26,7 @@ router.get(
 );
 
 router.post(
-    '/obtenerProductoBySlug',
+    '/obtenerProductoPorSlug',
     [
         check('slug', 'El slug del producto es obligatorio').not().isEmpty(),
         validarCampos

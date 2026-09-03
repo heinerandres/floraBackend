@@ -18,7 +18,6 @@ const ImagenesSchema = Schema ({
     },
     esPrincipal: {
         type: Boolean,
-        required: true,
     }
 });
 

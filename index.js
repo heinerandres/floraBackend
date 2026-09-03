@@ -11,12 +11,12 @@ import aromasRoute from './routes/aromasRoute.js';
 import beneficiosRoute from './routes/beneficiosRoute.js';
 import ingredientesRoute from './routes/ingredientesRoute.js';
 import tiposPielRoute from './routes/tiposPielRoute.js';
+import variantesRoute from './routes/variantesRoute.js';
+import path from "path";
 
 dotenv.config();
 
 const app = express();
-
-
 
 const startServer = async () => {
   try{
@@ -26,7 +26,9 @@ const startServer = async () => {
     app.use(express.json());
 
 
-    app.use(express.static('public'));
+    //app.use(express.static('public'));
+
+    app.use("/public", express.static(path.join(process.cwd(), "public")));
 
     app.get("/", (req, res) => {
       console.log("/");
@@ -39,6 +41,7 @@ const startServer = async () => {
     app.use('/api/beneficios', beneficiosRoute);
     app.use('/api/ingredientes', ingredientesRoute);
     app.use('/api/tiposPiel', tiposPielRoute);
+    app.use('/api/variantes', variantesRoute);
 
     const PORT = process.env.PORT || 4000;
 

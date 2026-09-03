@@ -1,8 +1,11 @@
 import Producto from '../models/Productos.js';
+import Imagenes from '../models/Imagenes.js';
 
 export const obtenerProductos = async (req, res) => {
     try{
-        const productos = await Producto.find();
+        const productos = await Producto.find()
+        .populate("categoria")
+        .populate("imagenes");
 
         res.status(201).json({
             ok: true,
@@ -24,6 +27,17 @@ export const crearProducto = async (req, res) => {
         const producto = new Producto(req.body);
         console.log(producto);
         await producto.save();
+
+        if (req.files) {
+            await Imagenes.insertMany(
+                Object.values(req.files)
+                    .flat()
+                    .map(file => ({
+                        producto: producto._id,
+                        url: file.filename
+                    }))
+            );
+        }
 
         res.status(201).json({
             ok: true,
@@ -82,7 +96,10 @@ export const editarProducto = async (req, res) => {
 export const obtenerProductoPorSlug = async (req, res) => {
     try {
         const slug = req.body.slug;
-        const producto = await Producto.findOne({slug});
+        const producto = await Producto.findOne({slug})
+        .populate("categoria")
+        .populate("imagenes")
+        .populate("variantes");
 
             res.status(201).json({
                 ok: true,

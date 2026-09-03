@@ -50,7 +50,7 @@ export const crearCategoria = async (req, res) => {
 export const editarCategoria = async (req, res) => {
     const id = req.body;
     try {
-        const categoriaActualizada = await Categoria.findByIdAndUpdate(
+        const categoriaActualizada = await Categorias.findByIdAndUpdate(
             id,
             req.body,
             { new: true }

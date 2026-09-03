@@ -31,4 +31,19 @@ const ProductosSchema = Schema ({
     },
 });
 
+ProductosSchema.virtual('imagenes', {
+    ref: 'Imagenes',      // Nombre del modelo de las variantes
+    localField: '_id',            // Campo del Producto
+    foreignField: 'producto'      // Campo de ProductoVariante que apunta al producto
+});
+
+ProductosSchema.virtual('variantes', {
+    ref: 'Variantes',      // Nombre del modelo de las variantes
+    localField: '_id',            // Campo del Producto
+    foreignField: 'producto'      // Campo de ProductoVariante que apunta al producto
+});
+
+ProductosSchema.set('toJSON', { virtuals: true });
+ProductosSchema.set('toObject', { virtuals: true });
+
 export default model( 'Productos', ProductosSchema );
