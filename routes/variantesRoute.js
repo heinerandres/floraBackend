@@ -11,10 +11,13 @@ import upload from '../storage/imagenes.js';
 
 const router = Router();
 
-import { crearVariante, editarVariante, obtenerVariantes, obtenerVariantePorNombre, eliminarVariante } from '../controllers/variantesController.js';
+import { crearVariante, editarVariante, obtenerVariantes, obtenerVariantePorNombre,obtenerVariantesPorSlug, eliminarVariante } from '../controllers/variantesController.js';
 
 router.post( 
     '/insertar', 
+    upload.fields([
+        { name: 'img1', maxCount: 1 },
+    ]),
     crearVariante );
 
 router.get(
@@ -29,6 +32,15 @@ router.post(
         validarCampos
     ], 
     obtenerVariantePorNombre
+);
+
+router.post(
+    '/obtenerVariantesPorSlug',
+    [
+        check('slug', 'El slug del producto es obligatorio').not().isEmpty(),
+        validarCampos
+    ], 
+    obtenerVariantesPorSlug
 );
 
 router.put(

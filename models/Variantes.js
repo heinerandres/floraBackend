@@ -44,4 +44,13 @@ const VariantesSchema = Schema ({
     }]
 });
 
+VariantesSchema.virtual('imagenes', {
+    ref: 'Imagenes',      // Nombre del modelo de las variantes
+    localField: '_id',            // Campo del Producto
+    foreignField: 'variante'      // Campo de ProductoVariante que apunta al producto
+});
+
+VariantesSchema.set('toJSON', { virtuals: true });
+VariantesSchema.set('toObject', { virtuals: true });
+
 export default model( 'Variantes', VariantesSchema );

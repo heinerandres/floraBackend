@@ -1,4 +1,6 @@
 import Variantes from '../models/Variantes.js';
+import Productos from '../models/Productos.js';
+import Imagenes from '../models/Imagenes.js';
 
 export const obtenerVariantes = async (req, res) => {
     try{
@@ -21,8 +23,18 @@ export const obtenerVariantes = async (req, res) => {
 
 export const crearVariante = async (req, res) => {
     try{
-        const variante = new Variantes(req.body);
-        console.log(variante);
+        const variante = new Variantes({
+            ...req.body,
+            precio: Number(req.body.precio),
+            stock: Number(req.body.stock),
+            presentacion: Number(req.body.presentacion),
+
+            ingredientes: JSON.parse(req.body.ingredientes),
+            beneficios: JSON.parse(req.body.beneficios),
+            tiposPiel: JSON.parse(req.body.tiposPiel),
+            aromas: JSON.parse(req.body.aromas),
+        });
+
         await variante.save();
 
         if (req.files) {
@@ -30,7 +42,7 @@ export const crearVariante = async (req, res) => {
                 Object.values(req.files)
                     .flat()
                     .map(file => ({
-                        producto: producto._id,
+                        producto: variante.producto,
                         variante: variante._id,
                         url: file.filename
                     }))
@@ -109,6 +121,38 @@ export const obtenerVariantePorNombre = async (req, res) => {
         });
     }
 }
+
+export const obtenerVariantesPorSlug = async (req, res) => {
+    try {
+        const { slug } = req.body;
+
+        const producto = await Productos.findOne({slug});
+
+        if (!producto) {
+            return res.status(404).json({
+                ok: false,
+                msg: "Producto no encontrado"
+            });
+        }
+
+        const variantes = await Variantes.find({
+            producto: producto._id
+        }).populate("imagenes");
+
+        return res.status(200).json({
+            ok: true,
+            variantes
+        });
+
+    } catch (error) {
+        console.log(error);
+
+        return res.status(500).json({
+            ok: false,
+            msg: "Por favor hable con el administrador"
+        });
+    }
+};
 
 export const eliminarVariante = async (req, res) => {
     try {
