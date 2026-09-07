@@ -11,7 +11,7 @@ import upload from '../storage/imagenes.js';
 
 const router = Router();
 
-import { crearProducto, editarProducto, obtenerProductos, obtenerProductoPorSlug, eliminarProducto } from '../controllers/productosController.js';
+import { crearProducto, editarProducto, obtenerProductos, obtenerProductoPorSlug, obtenerProductoPorVarianteSlug, eliminarProducto } from '../controllers/productosController.js';
 
 router.post( 
     '/insertar', 
@@ -32,6 +32,15 @@ router.post(
         validarCampos
     ], 
     obtenerProductoPorSlug
+);
+
+router.post(
+    '/obtenerProductoPorVarianteSlug',
+    [
+        check('slug', 'El slug del producto es obligatorio').not().isEmpty(),
+        validarCampos
+    ], 
+    obtenerProductoPorVarianteSlug
 );
 
 router.put(

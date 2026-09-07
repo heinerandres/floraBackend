@@ -1,28 +1,43 @@
 import Producto from '../models/Productos.js';
+import Variantes from '../models/Variantes.js';
 import Imagenes from '../models/Imagenes.js';
 import fs from "fs";
 import path from "path";
 
 export const obtenerProductos = async (req, res) => {
-    try{
+    try {
         const productos = await Producto.find()
-        .populate("categoria")
-        .populate("imagenes");
+            .populate("categoria")
+            .populate("imagenes");
 
-        res.status(201).json({
+        const productosConVariantes = await Promise.all(
+            productos.map(async (producto) => {
+                const cantidadVariantes = await Variantes.countDocuments({
+                    producto: producto._id
+                });
+
+                return {
+                    ...producto.toObject(),
+                    cantidadVariantes
+                };
+            })
+        );
+
+        res.status(200).json({
             ok: true,
-            productos
+            productos: productosConVariantes
         });
-    }
-    catch(error){
-        console.log("no se pudieron obtener los producto");
+
+    } catch (error) {
+        console.log("No se pudieron obtener los productos");
         console.log(error);
+
         res.status(500).json({
             ok: false,
-            msg: 'Por favor hable con el administrador'
+            msg: "Por favor hable con el administrador"
         });
     }
-}
+};
 
 export const crearProducto = async (req, res) => {
     try{
@@ -198,6 +213,41 @@ export const eliminarProducto = async (req, res) => {
         res.status(500).json({
             ok: false,
             msg: 'Por favor hable con el administrador'
+        });
+    }
+};
+
+export const obtenerProductoPorVarianteSlug = async (req, res) => {
+    try {
+        const { slug } = req.body;
+
+        const variante = await Variantes.findOne({ slug })
+        .populate({
+            path: "producto",
+            populate: [
+                { path: "imagenes" },
+                { path: "categoria" }
+            ]
+        });
+
+        if (!variante) {
+            return res.status(404).json({
+                ok: false,
+                msg: "Variante no encontrada"
+            });
+        }
+
+        return res.status(200).json({
+            ok: true,
+            producto: variante.producto
+        });
+
+    } catch (error) {
+        console.log(error);
+
+        return res.status(500).json({
+            ok: false,
+            msg: "Por favor hable con el administrador"
         });
     }
 };

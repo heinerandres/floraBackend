@@ -1,6 +1,8 @@
 import Variantes from '../models/Variantes.js';
 import Productos from '../models/Productos.js';
 import Imagenes from '../models/Imagenes.js';
+import fs from "fs";
+import path from "path";
 
 export const obtenerVariantes = async (req, res) => {
     try{
@@ -71,9 +73,11 @@ export const crearVariante = async (req, res) => {
 }
 
 export const editarVariante = async (req, res) => {
+
+    //logica de la imagen
     const id = req.body;
     try {
-        const varianteActualizado = await Variantes.findByIdAndUpdate(
+        const varianteActualizada = await Variantes.findByIdAndUpdate(
             id,
             req.body,
             { new: true }
@@ -103,10 +107,15 @@ export const editarVariante = async (req, res) => {
     }
 };
 
-export const obtenerVariantePorNombre = async (req, res) => {
+export const obtenerVariantePorSlug = async (req, res) => {
     try {
-        const nombre = req.body.nombre;
-        const variante = await Variantes.findOne({nombre});
+        const { slug } = req.body;
+        const variante = await Variantes.findOne({ slug })
+        .populate("imagenes")
+        .populate("beneficios")
+        .populate("aromas")
+        .populate("tiposPiel")
+        .populate("ingredientes");
 
             res.status(201).json({
                 ok: true,
@@ -122,7 +131,7 @@ export const obtenerVariantePorNombre = async (req, res) => {
     }
 }
 
-export const obtenerVariantesPorSlug = async (req, res) => {
+export const obtenerVariantesPorProductoSlug = async (req, res) => {
     try {
         const { slug } = req.body;
 
@@ -137,7 +146,12 @@ export const obtenerVariantesPorSlug = async (req, res) => {
 
         const variantes = await Variantes.find({
             producto: producto._id
-        }).populate("imagenes");
+        }).populate("producto")
+        .populate("imagenes")
+        .populate("aromas")
+        .populate("tiposPiel")
+        .populate("beneficios")
+        .populate("ingredientes");
 
         return res.status(200).json({
             ok: true,
@@ -156,23 +170,87 @@ export const obtenerVariantesPorSlug = async (req, res) => {
 
 export const eliminarVariante = async (req, res) => {
     try {
-        const id  = req.body;
-        const variante = await Variante.findByIdAndDelete(id);
+        const { _id } = req.body;
+
+        console.log(_id);
+
+        const variante = await Variantes.findById(_id);
+
         if (!variante) {
             return res.status(404).json({
                 ok: false,
-                msg: 'Variante no encontrado'
+                msg: 'Variante no encontrada'
             });
         }
+
+        // Buscar imágenes asociadas a la variante
+        const imagenes = await Imagenes.find({
+            variante: _id
+        });
+
+        // Eliminar archivos físicos
+        for (const imagen of imagenes) {
+            const rutaImagen = path.join(
+                process.cwd(),
+                'public',
+                'uploads',
+                imagen.url
+            );
+
+            if (fs.existsSync(rutaImagen)) {
+                fs.unlinkSync(rutaImagen);
+            }
+        }
+
+        // Eliminar registros de imágenes
+        await Imagenes.deleteMany({
+            variante: _id
+        });
+
+        // Eliminar variante
+        await Variantes.findByIdAndDelete(_id);
+
         res.status(200).json({
             ok: true,
-            msg: 'Variante eliminado'
+            msg: 'Variante eliminada'
         });
+
     } catch (error) {
         console.log(error);
+
         res.status(500).json({
             ok: false,
             msg: 'Por favor hable con el administrador'
+        });
+    }
+};
+
+
+export const obtenerProductoPorVarianteSlug = async (req, res) => {
+    try {
+        const { slug } = req.params;
+
+        const variante = await Variante.findOne({ slug })
+            .populate("producto");
+
+        if (!variante) {
+            return res.status(404).json({
+                ok: false,
+                msg: "Variante no encontrada"
+            });
+        }
+
+        return res.status(200).json({
+            ok: true,
+            producto: variante.producto
+        });
+
+    } catch (error) {
+        console.log(error);
+
+        return res.status(500).json({
+            ok: false,
+            msg: "Por favor hable con el administrador"
         });
     }
 };

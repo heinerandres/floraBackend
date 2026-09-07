@@ -11,7 +11,7 @@ import upload from '../storage/imagenes.js';
 
 const router = Router();
 
-import { crearVariante, editarVariante, obtenerVariantes, obtenerVariantePorNombre,obtenerVariantesPorSlug, eliminarVariante } from '../controllers/variantesController.js';
+import { crearVariante, editarVariante, obtenerVariantes, obtenerVariantePorSlug, obtenerVariantesPorProductoSlug, eliminarVariante } from '../controllers/variantesController.js';
 
 router.post( 
     '/insertar', 
@@ -26,35 +26,28 @@ router.get(
 );
 
 router.post(
-    '/obtenerVariantePorNombre',
+    '/obtenerVariantePorSlug',
     [
-        check('nombre', 'El nombre es obligatorio').not().isEmpty(),
+        check('slug', 'El nombre es obligatorio').not().isEmpty(),
         validarCampos
     ], 
-    obtenerVariantePorNombre
+    obtenerVariantePorSlug
 );
 
 router.post(
-    '/obtenerVariantesPorSlug',
+    '/obtenerVariantesPorProductoSlug',
     [
         check('slug', 'El slug del producto es obligatorio').not().isEmpty(),
         validarCampos
     ], 
-    obtenerVariantesPorSlug
+    obtenerVariantesPorProductoSlug
 );
 
 router.put(
     '/editar',
-    [
-        check('_id', 'El _id es obligatorio').not().isEmpty(),
-        check('producto', 'El producto es obligatorio').not().isEmpty(),
-        check('nombre', 'El nombre es obligatorio').not().isEmpty(),
-        check('precio', 'El precio es obligatoria').not().isEmpty(),
-        check('stock', 'El stock es obligatoria').not().isEmpty(),
-        check('precentacion', 'La precentacion es obligatoria').not().isEmpty(),
-        check('unidadMedida', 'La unidadMedida es obligatoria').not().isEmpty(),
-        validarCampos
-    ],
+    upload.fields([
+        { name: 'img1', maxCount: 1 },
+    ]),
     editarVariante
 );
 
