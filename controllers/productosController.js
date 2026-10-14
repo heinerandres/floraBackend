@@ -196,20 +196,52 @@ export const obtenerProductoPorSlug = async (req, res) => {
 
 export const eliminarProducto = async (req, res) => {
     try {
-        const id  = req.body;
-        const producto = await Producto.findByIdAndDelete(id);
+        const { _id } = req.body;
+
+        const producto = await Producto.findById(_id);
+
         if (!producto) {
             return res.status(404).json({
                 ok: false,
                 msg: 'Producto no encontrado'
             });
         }
+
+        // Buscar imágenes asociadas a la variante
+        const imagenes = await Imagenes.find({
+            producto: _id
+        });
+
+        // Eliminar archivos físicos
+        for (const imagen of imagenes) {
+            const rutaImagen = path.join(
+                process.cwd(),
+                'public',
+                'uploads',
+                imagen.url
+            );
+
+            if (fs.existsSync(rutaImagen)) {
+                fs.unlinkSync(rutaImagen);
+            }
+        }
+
+        // Eliminar registros de imágenes
+        await Imagenes.deleteMany({
+            producto: _id
+        });
+
+        // Eliminar variante
+        await Producto.findByIdAndDelete(_id);
+
         res.status(200).json({
             ok: true,
             msg: 'Producto eliminado'
         });
+
     } catch (error) {
         console.log(error);
+
         res.status(500).json({
             ok: false,
             msg: 'Por favor hable con el administrador'

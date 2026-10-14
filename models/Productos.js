@@ -20,12 +20,6 @@ const ProductosSchema = Schema ({
         type: String,
         required: true
     },
-    precio: {
-        type: Number
-    },
-    cantidad: {
-        type: Number
-    },
     esDestacado: {
         type: Boolean
     },

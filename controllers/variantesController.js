@@ -31,10 +31,10 @@ export const crearVariante = async (req, res) => {
             stock: Number(req.body.stock),
             presentacion: Number(req.body.presentacion),
 
-            ingredientes: JSON.parse(req.body.ingredientes),
-            beneficios: JSON.parse(req.body.beneficios),
-            tiposPiel: JSON.parse(req.body.tiposPiel),
-            aromas: JSON.parse(req.body.aromas),
+            ingredientes: JSON.parse(req.body.ingredientes ?? "[]"),
+            beneficios: JSON.parse(req.body.beneficios ?? "[]"),
+            tiposPiel: JSON.parse(req.body.tiposPiel ?? "[]"),
+            aromas: JSON.parse(req.body.aromas ?? "[]"),
         });
 
         await variante.save();
@@ -74,35 +74,108 @@ export const crearVariante = async (req, res) => {
 
 export const editarVariante = async (req, res) => {
 
-    //logica de la imagen
-    const id = req.body;
+    const { _id, ...datos } = req.body;
+
     try {
-        const varianteActualizada = await Variantes.findByIdAndUpdate(
-            id,
-            req.body,
-            { new: true }
-        );
-        if (!varianteActualizada) {
+
+        const variante = await Variantes.findById(_id);
+
+        if (!variante) {
             return res.status(404).json({
                 ok: false,
-                msg: 'Variante no encontrado'
+                msg: "Variante no encontrada"
             });
         }
-        res.status(200).json({
+
+        // ==========================================
+        // CONVERTIR DATOS
+        // ==========================================
+
+        datos.precio = Number(datos.precio);
+        datos.stock = Number(datos.stock);
+        datos.presentacion = Number(datos.presentacion);
+
+        datos.ingredientes = JSON.parse(datos.ingredientes ?? "[]");
+        datos.beneficios = JSON.parse(datos.beneficios ?? "[]");
+        datos.tiposPiel = JSON.parse(datos.tiposPiel ?? "[]");
+        datos.aromas = JSON.parse(datos.aromas ?? "[]");
+
+
+        // ==========================================
+        // ACTUALIZAR IMAGEN
+        // ==========================================
+
+        const img1 = req.files?.img1?.[0];
+
+        if (img1) {
+
+            const imagenActual = await Imagenes.findOne({
+                variante: variante._id
+            });
+
+            if (imagenActual) {
+
+                const rutaImagen = path.join(
+                    process.cwd(),
+                    "public",
+                    "uploads",
+                    imagenActual.url
+                );
+
+                if (fs.existsSync(rutaImagen)) {
+                    fs.unlinkSync(rutaImagen);
+                }
+
+                imagenActual.url = img1.filename;
+
+                await imagenActual.save();
+
+            } else {
+
+                await Imagenes.create({
+                    producto: variante.producto,
+                    variante: variante._id,
+                    url: img1.filename
+                });
+
+            }
+        }
+
+
+        // ==========================================
+        // ACTUALIZAR VARIANTE
+        // ==========================================
+
+        const varianteActualizada =
+            await Variantes.findByIdAndUpdate(
+                _id,
+                datos,
+                {
+                    new: true,
+                    runValidators: true
+                }
+            );
+
+
+        return res.status(200).json({
             ok: true,
             variante: varianteActualizada
         });
+
     } catch (error) {
+
         console.log(error);
-        if(error.code === 11000){
-            res.status(500).json({
+
+        if (error.code === 11000) {
+            return res.status(400).json({
                 ok: false,
-                msg: 'La variante ya existe'
+                msg: "La variante ya existe"
             });
         }
-        res.status(500).json({
+
+        return res.status(500).json({
             ok: false,
-            msg: 'Por favor hable con el administrador'
+            msg: "Por favor hable con el administrador"
         });
     }
 };
@@ -171,8 +244,6 @@ export const obtenerVariantesPorProductoSlug = async (req, res) => {
 export const eliminarVariante = async (req, res) => {
     try {
         const { _id } = req.body;
-
-        console.log(_id);
 
         const variante = await Variantes.findById(_id);
 
